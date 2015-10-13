@@ -13,7 +13,7 @@ function checkAdsUrlRemoteScript(){
  */
  this.createConfigReport = function(){
   var accounts = MccApp.accounts().orderBy("ManagerCustomerId").get();
-  info('Generating config report for the ' + accounts.totalNumEntities() + ' accounts.');
+  this.info('Generating config report for the ' + accounts.totalNumEntities() + ' accounts.');
   var spreadSheets = openSpreadsheets(CONFIG_SPREADSHEETS_URL);
   var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
 
@@ -36,11 +36,11 @@ function checkAdsUrlRemoteScript(){
     spreadSheet.getRange('C' + row).setValue(numAds);
     row++;
   }
-  info('Config report generated for the ' + accounts.totalNumEntities() + ' accounts.');
-  info('Total accounts to be processed: ' + spreadSheet.getRange('H3').getValue());
+  this.info('Config report generated for the ' + accounts.totalNumEntities() + ' accounts.');
+  this.info('Total accounts to be processed: ' + spreadSheet.getRange('H3').getValue());
   var accountList = spreadSheet.getRange('H1').getValue();
   accountList = accountList.replace(/,$/, "");
-  info('Account list to be processed: ' + accountList);
+  this.info('Account list to be processed: ' + accountList);
   return accountList;
 }
 
@@ -57,7 +57,7 @@ this.checkUrls = function(iterator, accountName) {
 
   var currentEntity = 0;
   var totalNumEntities = iterator.totalNumEntities();
-  info('Validating ' + totalNumEntities + ' elements for account ' + accountName); 
+  this.info('Validating ' + totalNumEntities + ' elements for account ' + accountName); 
   
   var urlMap = {};
   var results = [];
@@ -127,7 +127,7 @@ this.checkUrls = function(iterator, accountName) {
       }
       
       if (adChanged==1){
-        info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
+        this.info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
 	    if (IS_TEST==0){
           changeAdStatus(ad);
         }
@@ -147,7 +147,7 @@ this.checkUrls = function(iterator, accountName) {
       });
     }
   }
-  info(totalNumEntities + ' elements processed for account ' + accountName);
+  this.info(totalNumEntities + ' elements processed for account ' + accountName);
   
   return results;
 }
@@ -160,10 +160,10 @@ this.checkUrls = function(iterator, accountName) {
  */
 function changeAdStatus(adEntity){
   if (adEntity.isEnabled()) {
-    info('  Ad with id ' + adEntity.getId() + ' will be paused');
+    this.info('  Ad with id ' + adEntity.getId() + ' will be paused');
     adEntity.pause();
   } else if (adEntity.isPaused()) {
-    info('  Ad with id ' + adEntity.getId() + ' will be enabled');
+    this.info('  Ad with id ' + adEntity.getId() + ' will be enabled');
     adEntity.enable();
   }
 }
@@ -330,7 +330,7 @@ function writeReportSummary(spreadSheets, res, accountResults){
  * @return {SpreadSheet} The spreadsheet.
  */
 function copySpreadsheets(spreadsheetsUrl, newSpreadSheetsName) {
-  info('Copying spreadsheets document from ' + spreadsheetsUrl);
+  this.info('Copying spreadsheets document from ' + spreadsheetsUrl);
   return SpreadsheetApp.openByUrl(spreadsheetsUrl).copy(newSpreadSheetsName);
 }
 
@@ -340,7 +340,7 @@ function copySpreadsheets(spreadsheetsUrl, newSpreadSheetsName) {
  * @return {SpreadSheet} The spreadsheet.
  */
 function openSpreadsheets(spreadsheetsUrl) {
-  info('Reading spreadsheets document from ' + spreadsheetsUrl);
+  this.info('Reading spreadsheets document from ' + spreadsheetsUrl);
   return SpreadsheetApp.openByUrl(spreadsheetsUrl);
 }
 
