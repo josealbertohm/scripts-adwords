@@ -1,8 +1,7 @@
 function checkAdsUrlRemoteScript(){
   this.main = function(){
-    Logger.log("Hello World");
-    // var accountList = createConfigReport();
-    // processAdsURL(accountList);
+    var accountList = createConfigReport();
+    processAdsURL(accountList);
   }
 }
 
