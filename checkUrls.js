@@ -59,7 +59,7 @@ function processAdsURL(accountList){
    .withIds(accountList.split(","));
   info('Processing ' + accounts.get().totalNumEntities() + ' accounts.');
   
-  accounts.executeInParallel("checkUrlsReport", "reportResults");
+  accounts.executeInParallel("checkAdsUrlRemoteScript.checkUrlsReport", "checkAdsUrlRemoteScript.reportResults");
 }
 
 
