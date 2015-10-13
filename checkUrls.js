@@ -5,10 +5,59 @@
  * @return {none}
  */
 function checkAdsUrlRemoteScript(){
-  this.main = function(){
-    var accountList = createConfigReport();
-    processAdsURL(accountList);
+
+/**
+ * Function for generate the config spreadSheet report
+ * @param {none}
+ * @return {string} account list with the accounts to be processed
+ */
+ this.createConfigReport = function(){
+  var accounts = MccApp.accounts().orderBy("ManagerCustomerId").get();
+  info('Generating config report for the ' + accounts.totalNumEntities() + ' accounts.');
+  var spreadSheets = openSpreadsheets(CONFIG_SPREADSHEETS_URL);
+  var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
+
+  var row = 2;
+  spreadSheet.getRange('A2:C50').setValue(""); // Clear all previous data
+  spreadSheet.getRange('H10:H11').setValue(""); // Clear all previous data
+
+  spreadSheet.getRange('H10').setValue( getCurrentDate('dd/MM/yyyy HH:mm:ss') );
+  spreadSheet.getRange('H11').setValue( "procesando..." );
+  
+  while (accounts.hasNext()) {
+    var account = accounts.next();
+    MccApp.select(account);
+    var numAds = AdWordsApp.ads().withCondition('Status IN [ENABLED,PAUSED]').get().totalNumEntities();
+    debug('Account: ' + account.getName() + ' ' + account.getCustomerId() + ' with Ads: ' + numAds); 
+
+    // Write account data details    
+    spreadSheet.getRange('A' + row).setValue(account.getName());
+    spreadSheet.getRange('B' + row).setValue(account.getCustomerId());
+    spreadSheet.getRange('C' + row).setValue(numAds);
+    row++;
   }
+  info('Config report generated for the ' + accounts.totalNumEntities() + ' accounts.');
+  info('Total accounts to be processed: ' + spreadSheet.getRange('H3').getValue());
+  var accountList = spreadSheet.getRange('H1').getValue();
+  accountList = accountList.replace(/,$/, "");
+  info('Account list to be processed: ' + accountList);
+  return accountList;
+}
+
+
+/**
+ * Function for launching the Ads process in parallel
+ * @param {string} account list with the accounts to be processed
+ * @return {void}
+ */
+this.processAdsURL = function(accountList){
+  var accounts = MccApp.accounts()  
+   .withIds(accountList.split(","));
+
+  info('Processing ' + accounts.get().totalNumEntities() + ' account(s)');
+  
+  accounts.executeInParallel("checkUrlsReport", "reportResults");
+}
 
 
 /**
@@ -51,120 +100,6 @@ this.checkUrlsReport = function(){
     adsResults : resultsUrls
   });  
 }
-
-
-/**
- * Send an email with the Spread Sheets URL details for the email(s) defined
- * @param {array} Array with the results in JSON format
- * @return {none}.
- */
- this.reportResults = function(results){ 
-  info('Generating spreadsheet report');
-  var spreadSheets = copySpreadsheets(CONFIG_SPREADSHEETS_URL, REPORT_PREFIX + getCurrentDate("dd-MM-yyyy"));
-  var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
-  var processStartTime = spreadSheet.getRange('H10').getValue();
-
-  var summaryEmailData = [];
-  
-  for(var i in results) {
-    if(!results[i].getReturnValue()) { continue; }
-    
-    var res = JSON.parse(results[i].getReturnValue());
-    info('Reporting data for account ' + res.accountId + ' ' + res.accountName);
-    var accountResults = writeAccountDataToSpreadsheet(spreadSheets, res);
-    writeReportSummary(spreadSheets, res, accountResults);
-    
-    summaryEmailData.push({accountId:res.accountId,
-                           accountName:res.accountName,
-                           adsCount:res.adsCount,
-                           adsProcessed:res.adsProcessed,
-                           adsChanged:accountResults.adsChanged.length,
-                           sheetUrl:accountResults.spreadSheetUrl});
-    
-    if (accountResults.adsChanged.length > 0){
-      info(accountResults.adsChanged.length + ' ads were changed for the account ' + res.accountName);
-    }
-  }
-
-  if(summaryEmailData.length > 0) {
-    spreadSheet.getRange('H11').setValue( getCurrentDate('dd/MM/yyyy HH:mm:ss') );
-    var processEndTime = spreadSheet.getRange('H11').getValue();
-  
-    var file = DriveApp.getFileById(spreadSheets.getId());
-    info('Sharing the SpreadSheets file with Id: ' + spreadSheets.getId());
-    try {
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    } catch(e) {
-      file.setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
-    }
-    
-    var subject = SUBJECT_EMAIL + getCurrentDate("dd-MM-yyyy");
-    var emailMsg = createSummaryHTMLEmail(subject, spreadSheets.getUrl(), summaryEmailData);
-    var options = { htmlBody : emailMsg };
-    info('Sending email report results');
-    for (var i in RECIPIENT_EMAIL){
-      MailApp.sendEmail(RECIPIENT_EMAIL[i], subject, subject, options);
-      info('Email report results send to: ' + RECIPIENT_EMAIL[i]);
-    }
-  }
-}
-
-}
-
-  
-/**
- * Function for generate the config spreadSheet report
- * @param {none}
- * @return {string} account list with the accounts to be processed
- */
-function createConfigReport(){
-  var accounts = MccApp.accounts().orderBy("ManagerCustomerId").get();
-  info('Generating config report for the ' + accounts.totalNumEntities() + ' accounts.');
-  var spreadSheets = openSpreadsheets(CONFIG_SPREADSHEETS_URL);
-  var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
-
-  var row = 2;
-  spreadSheet.getRange('A2:C50').setValue(""); // Clear all previous data
-  spreadSheet.getRange('H10:H11').setValue(""); // Clear all previous data
-
-  spreadSheet.getRange('H10').setValue( getCurrentDate('dd/MM/yyyy HH:mm:ss') );
-  spreadSheet.getRange('H11').setValue( "procesando..." );
-  
-  while (accounts.hasNext()) {
-    var account = accounts.next();
-    MccApp.select(account);
-    var numAds = AdWordsApp.ads().withCondition('Status IN [ENABLED,PAUSED]').get().totalNumEntities();
-    debug('Account: ' + account.getName() + ' ' + account.getCustomerId() + ' with Ads: ' + numAds); 
-
-    // Write account data details    
-    spreadSheet.getRange('A' + row).setValue(account.getName());
-    spreadSheet.getRange('B' + row).setValue(account.getCustomerId());
-    spreadSheet.getRange('C' + row).setValue(numAds);
-    row++;
-  }
-  info('Config report generated for the ' + accounts.totalNumEntities() + ' accounts.');
-  info('Total accounts to be processed: ' + spreadSheet.getRange('H3').getValue());
-  var accountList = spreadSheet.getRange('H1').getValue();
-  accountList = accountList.replace(/,$/, "");
-  info('Account list to be processed: ' + accountList);
-  return accountList;
-}
-
-
-/**
- * Function for launching the Ads process in parallel
- * @param {string} account list with the accounts to be processed
- * @return {void}
- */
-function processAdsURL(accountList){
-  var accounts = MccApp.accounts()  
-   .withIds(accountList.split(","));
-
-  info('Processing ' + accounts.get().totalNumEntities() + ' account(s)');
-  
-  accounts.executeInParallel("checkUrlsReport", "reportResults");
-}
-
 
 /**
  * Function for validate each URL in the Ads listed the Ad Iterator
@@ -328,6 +263,63 @@ function fetchURL(adsUrl){
     }
   }
   return result;
+}
+
+
+/**
+ * Send an email with the Spread Sheets URL details for the email(s) defined
+ * @param {array} Array with the results in JSON format
+ * @return {none}.
+ */
+this.reportResults = function(results){ 
+  info('Generating spreadsheet report');
+  var spreadSheets = copySpreadsheets(CONFIG_SPREADSHEETS_URL, REPORT_PREFIX + getCurrentDate("dd-MM-yyyy"));
+  var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
+  var processStartTime = spreadSheet.getRange('H10').getValue();
+
+  var summaryEmailData = [];
+  
+  for(var i in results) {
+    if(!results[i].getReturnValue()) { continue; }
+    
+    var res = JSON.parse(results[i].getReturnValue());
+    info('Reporting data for account ' + res.accountId + ' ' + res.accountName);
+    var accountResults = writeAccountDataToSpreadsheet(spreadSheets, res);
+    writeReportSummary(spreadSheets, res, accountResults);
+    
+    summaryEmailData.push({accountId:res.accountId,
+                           accountName:res.accountName,
+                           adsCount:res.adsCount,
+                           adsProcessed:res.adsProcessed,
+                           adsChanged:accountResults.adsChanged.length,
+                           sheetUrl:accountResults.spreadSheetUrl});
+    
+    if (accountResults.adsChanged.length > 0){
+      info(accountResults.adsChanged.length + ' ads were changed for the account ' + res.accountName);
+    }
+  }
+
+  if(summaryEmailData.length > 0) {
+    spreadSheet.getRange('H11').setValue( getCurrentDate('dd/MM/yyyy HH:mm:ss') );
+    var processEndTime = spreadSheet.getRange('H11').getValue();
+  
+    var file = DriveApp.getFileById(spreadSheets.getId());
+    info('Sharing the SpreadSheets file with Id: ' + spreadSheets.getId());
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch(e) {
+      file.setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
+    }
+    
+    var subject = SUBJECT_EMAIL + getCurrentDate("dd-MM-yyyy");
+    var emailMsg = createSummaryHTMLEmail(subject, spreadSheets.getUrl(), summaryEmailData);
+    var options = { htmlBody : emailMsg };
+    info('Sending email report results');
+    for (var i in RECIPIENT_EMAIL){
+      MailApp.sendEmail(RECIPIENT_EMAIL[i], subject, subject, options);
+      info('Email report results send to: ' + RECIPIENT_EMAIL[i]);
+    }
+  }
 }
 
 
@@ -497,3 +489,5 @@ function warn(msg)  { if(LOG_LEVELS['warn']  <= LOG_LEVELS[LOG_LEVEL]) { log('WA
 function info(msg)  { if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { log('INFO' ,msg); } }
 function debug(msg) { if(LOG_LEVELS['debug'] <= LOG_LEVELS[LOG_LEVEL]) { log('DEBUG',msg); } }
 function log(type,msg) { Logger.log(type + ' - ' + msg); }
+
+}
