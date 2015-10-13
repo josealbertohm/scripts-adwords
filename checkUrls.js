@@ -14,7 +14,7 @@ function checkAdsUrlRemoteScript(){
  this.createConfigReport = function(){
   var accounts = MccApp.accounts().orderBy("ManagerCustomerId").get();
   this.info('Generating config report for the ' + accounts.totalNumEntities() + ' accounts.');
-  var spreadSheets = openSpreadsheets(CONFIG_SPREADSHEETS_URL);
+  var spreadSheets = this.openSpreadsheets(CONFIG_SPREADSHEETS_URL);
   var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
 
   var row = 2;
@@ -106,7 +106,7 @@ this.checkUrls = function(iterator, accountName) {
       // Avoid URL duplicated
       var lastUrl = encodeURI(urls[i]);
       if (!(lastUrl in urlMap)) {
-        urlMap[lastUrl] = fetchURL(lastUrl);
+        urlMap[lastUrl] = this.fetchURL(lastUrl);
       }
       
       var adNewState = adState;
@@ -129,7 +129,7 @@ this.checkUrls = function(iterator, accountName) {
       if (adChanged==1){
         this.info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
 	    if (IS_TEST==0){
-          changeAdStatus(ad);
+          this.changeAdStatus(ad);
         }
       }
       
@@ -158,7 +158,7 @@ this.checkUrls = function(iterator, accountName) {
  * @param {object} Ad entity object
  * @return {none}
  */
-function changeAdStatus(adEntity){
+this.changeAdStatus = function(adEntity){
   if (adEntity.isEnabled()) {
     this.info('  Ad with id ' + adEntity.getId() + ' will be paused');
     adEntity.pause();
@@ -174,7 +174,7 @@ function changeAdStatus(adEntity){
  * @param {string} adsUrl The Adword's URL.
  * @return {array} The responseCode and content (0,1,2) in JSON format.
  */
-function fetchURL(adsUrl){
+this.fetchURL = function(adsUrl){
   var result = {};
   var now = new Date().getTime();
   var responseCode = 500;
@@ -215,7 +215,7 @@ function fetchURL(adsUrl){
  * @param {SpreadSheets,array} SpreadSheets object with the report, Array with the data records by account
  * @return {array} Array with the summary data (totals) by account
  */
-function writeAccountDataToSpreadsheet(spreadSheets, res) {
+this.writeAccountDataToSpreadsheet = function(spreadSheets, res) {
   var spreadSheet = spreadSheets.getSheetByName(res.accountId);
   if(!spreadSheet) {
     spreadSheet = spreadSheets.insertSheet(res.accountId, spreadSheets.getSheets().length);
@@ -257,7 +257,7 @@ function writeAccountDataToSpreadsheet(spreadSheets, res) {
  * @param {SpreadSheets,array,array} SpreadSheets object with the report, Array with the results by account, Array with totals by account
  * @return {none}
  */
-function writeReportSummary(spreadSheets, res, accountResults){
+this.writeReportSummary = function(spreadSheets, res, accountResults){
   var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
   
   for (var i in res){
@@ -287,7 +287,7 @@ function writeReportSummary(spreadSheets, res, accountResults){
  * @param {string,array} Subject text used in the email, array with the summary email data foreach account
  * @return {string} The HTML layout for the email
  */
- function createSummaryHTMLEmail(subject, spreadSheetsUrl, summaryEmailData) {
+ this.createSummaryHTMLEmail = function(subject, spreadSheetsUrl, summaryEmailData) {
   var body = subject;
   var cssStyle = '*{margin:0;padding:0;box-sizing:border-box}table{color:#333;font-family:sans-serif;font-size:.9em;font-weight:300;text-align:left;line-height:40px;border-spacing:0;border:1px solid #428bca;width:500px;margin:20px auto}thead tr:first-child{background:#428bca;color:#fff;border:none}th{font-weight:700}td:first-child,th:first-child{padding:0 15px 0 20px}thead tr:last-child th{border-bottom:2px solid #ddd}tbody tr:hover{background-color:#f0fbff}tbody tr:last-child td{border:none}tbody td{border-bottom:1px solid #ddd}td:last-child{text-align:right;padding-right:10px}.button{color:#696969;padding-right:5px;cursor:pointer}.alterar:hover{color:#428bca}.excluir:hover{color:#dc2a2a}';
   var htmlBody = '<html><style>' + cssStyle + '</style><body><a href="'+ spreadSheetsUrl +'">' + body + '</a>';
@@ -329,7 +329,7 @@ function writeReportSummary(spreadSheets, res, accountResults){
  * @param {string} spreadsheetsUrl The URL of the spreadsheet.
  * @return {SpreadSheet} The spreadsheet.
  */
-function copySpreadsheets(spreadsheetsUrl, newSpreadSheetsName) {
+this.copySpreadsheets = function(spreadsheetsUrl, newSpreadSheetsName) {
   this.info('Copying spreadsheets document from ' + spreadsheetsUrl);
   return SpreadsheetApp.openByUrl(spreadsheetsUrl).copy(newSpreadSheetsName);
 }
@@ -339,7 +339,7 @@ function copySpreadsheets(spreadsheetsUrl, newSpreadSheetsName) {
  * @param {string} spreadsheetsUrl The URL of the spreadsheet.
  * @return {SpreadSheet} The spreadsheet.
  */
-function openSpreadsheets(spreadsheetsUrl) {
+this.openSpreadsheets = function(spreadsheetsUrl) {
   this.info('Reading spreadsheets document from ' + spreadsheetsUrl);
   return SpreadsheetApp.openByUrl(spreadsheetsUrl);
 }
