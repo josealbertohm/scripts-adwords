@@ -1,4 +1,3 @@
-
 /**
  * Function checkAdsUrlRemoteScript for remote invocation
  * @param {none}
@@ -306,9 +305,9 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
     var row = summaryEmailData[i];
     htmlBody += '<tr><td align="left">'+ numAccount++ +
       '</td><td align="left"><a href="'+ row.sheetUrl +'">' + row.accountId + ' - ' + row.accountName + '</a>' +
-      '</td><td align="right">' + formatStringToNumber(row.adsCount, false) + 
-      '</td><td align="right">' + formatStringToNumber(row.adsProcessed, false) + 
-      '</td><td align="right">' + formatStringToNumber(row.adsChanged, false) + 
+      '</td><td align="right">' + this.formatStringToNumber(row.adsCount, false) + 
+      '</td><td align="right">' + this.formatStringToNumber(row.adsProcessed, false) + 
+      '</td><td align="right">' + this.formatStringToNumber(row.adsChanged, false) + 
       '</td></tr>';
     adsChanged = adsChanged + row.adsChanged;
   }
