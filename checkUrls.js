@@ -373,7 +373,9 @@ this.formatStringToNumber = function(numValue,isCurrency){
 var LOG_LEVELS = { 'error':1, 'warn':2, 'info':3, 'debug':4 };
 this.error = function(msg) { if(LOG_LEVELS['error'] <= LOG_LEVELS[LOG_LEVEL]) { this.log('ERROR',msg); } }
 this.warn = function(msg)  { if(LOG_LEVELS['warn']  <= LOG_LEVELS[LOG_LEVEL]) { this.log('WARN' ,msg); } }
-this.info = function(msg)  { if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { this.log('INFO' ,msg); } }
+this.info = function(msg)  { 
+  Logger.log("Hola");
+ if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { this.log('INFO' ,msg); } }
 this.debug = function(msg) { if(LOG_LEVELS['debug'] <= LOG_LEVELS[LOG_LEVEL]) { this.log('DEBUG',msg); } }
 this.log = function(type,msg) { Logger.log(type + ' - ' + msg); }
 
