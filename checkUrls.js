@@ -5,6 +5,11 @@
  */
 function checkAdsUrlRemoteScript(){
 
+  const ENABLED_STATE = "enabled";
+  const PAUSSED_STATE = "paussed";
+
+  var configObject = null;
+  
 /**
  * Function for generate the config spreadSheet report
  * @param {none}
@@ -111,15 +116,15 @@ this.checkUrls = function(iterator, accountName) {
     }
         
     // Validate Campaign state (Enabled/Paused)
-    var campaignState = ENABLED_STATE;
+    var campaignState = this.ENABLED_STATE;
     if (campaign.isPaused()) {
-      campaignState = PAUSSED_STATE;
+      campaignState = this.PAUSSED_STATE;
     }
                 
     // Validate Ad state (Enabled/Paused)
-    var adState = ENABLED_STATE;
+    var adState = this.ENABLED_STATE;
     if (ad.isPaused()) {
-      adState = PAUSSED_STATE;
+      adState = this.PAUSSED_STATE;
     }
         
     // var urls = [ad.urls().getFinalUrl(), ad.urls().getMobileFinalUrl()];
@@ -153,15 +158,15 @@ this.checkUrls = function(iterator, accountName) {
       var adChanged = 0;
       // Case Añadir Lista
       if (urlMap[lastUrl].content==1) {
-        if (adState==ENABLED_STATE){
-          adNewState = PAUSSED_STATE;
+        if (adState==this.ENABLED_STATE){
+          adNewState = this.PAUSSED_STATE;
           adChanged = 1;
         }
       }
       // Case Añadir A Carrito
       if (urlMap[lastUrl].content==2) {
-        if (adState==PAUSSED_STATE){
-          adNewState = ENABLED_STATE;
+        if (adState==this.PAUSSED_STATE){
+          adNewState = this.ENABLED_STATE;
           adChanged = 1;
         }
       }
