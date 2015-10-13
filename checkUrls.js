@@ -300,7 +300,7 @@ this.reportResults = function(results){
       file.setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
     }
     
-    var subject = SUBJECT_EMAIL + this.getCurrentDate("dd-MM-yyyy");
+    var subject = REPORT_PREFIX + ' del día ' + this.getCurrentDate("dd-MM-yyyy");
     var emailMsg = this.createSummaryHTMLEmail(subject, spreadSheets.getUrl(), summaryEmailData);
     var options = { htmlBody : emailMsg };
     this.info('Sending email report results');
