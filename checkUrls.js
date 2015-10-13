@@ -21,7 +21,7 @@ function checkAdsUrlRemoteScript(){
   spreadSheet.getRange('A2:C50').setValue(""); // Clear all previous data
   spreadSheet.getRange('H10:H11').setValue(""); // Clear all previous data
 
-  spreadSheet.getRange('H10').setValue( getCurrentDate('dd/MM/yyyy HH:mm:ss') );
+  spreadSheet.getRange('H10').setValue( this.getCurrentDate('dd/MM/yyyy HH:mm:ss') );
   spreadSheet.getRange('H11').setValue( "procesando..." );
   
   while (accounts.hasNext()) {
@@ -265,14 +265,14 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
     var accountIdInCell = spreadSheet.getRange('M' + row).getValue();
     while (accountIdInCell != "") {    
       if (res.accountId == accountIdInCell) {
-      spreadSheet.getRange('O' + row).setFormula('=HYPERLINK("' 
+        spreadSheet.getRange('O' + row).setFormula('=HYPERLINK("' 
                                                    + accountResults.spreadSheetUrl + '","Hoja ' + res.accountId + '")');
-      spreadSheet.getRange('P' + row).setValue(res.processStartTime);
-      spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
-      spreadSheet.getRange('R' + row).setValue(res.accountProcessed);
-      spreadSheet.getRange('S' + row).setValue(res.adsCount);
-      spreadSheet.getRange('T' + row).setValue(res.adsProcessed);
-      spreadSheet.getRange('U' + row).setValue(accountResults.adsChanged.length);
+        spreadSheet.getRange('P' + row).setValue(res.processStartTime);
+        spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
+        spreadSheet.getRange('R' + row).setValue(res.accountProcessed);
+        spreadSheet.getRange('S' + row).setValue(res.adsCount);
+        spreadSheet.getRange('T' + row).setValue(res.adsProcessed);
+        spreadSheet.getRange('U' + row).setValue(accountResults.adsChanged.length);
         break;
       }
       row++;
@@ -314,7 +314,7 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
   }
   htmlBody += '</tbody></table>';
   htmlBody += '<br/ >';
-  htmlBody += getCurrentDate('MMMM dd, yyyy @ hh:mma z');
+  htmlBody += this.getCurrentDate('MMMM dd, yyyy @ hh:mma z');
   htmlBody += '<br/ >Procesadas : ' + Object.keys(summaryEmailData).length + ' cuentas ';
   htmlBody += 'con: ' + adsChanged + ' cambios de Ads';
   htmlBody += '<br/ ><br/ >Hecho por : <a href="http://www.walmart.com.mx">Walmart México</a>.';
