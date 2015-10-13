@@ -214,7 +214,7 @@ this.fetchURL = function(adsUrl){
  * @param {array} Array with the results in JSON format
  * @return {none}.
  */
-thia.reportResults = function(results){ 
+this.reportResults = function(results){ 
   this.info('Generating spreadsheet report');
   var spreadSheets = this.copySpreadsheets(CONFIG_SPREADSHEETS_URL, REPORT_PREFIX + this.getCurrentDate("dd-MM-yyyy"));
   var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
