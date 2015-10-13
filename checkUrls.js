@@ -56,7 +56,7 @@ this.processAdsURL = function(accountList){
 
   info('Processing ' + accounts.get().totalNumEntities() + ' account(s)');
   
-  accounts.executeInParallel("checkUrlsReport", "reportResults");
+  accounts.executeInParallel("this.checkUrlsReport()", "this.reportResults()");
 }
 
 
