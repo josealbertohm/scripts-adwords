@@ -392,7 +392,7 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
  this.createSummaryHTMLEmail = function(subject, spreadSheetsUrl, summaryEmailData) {
   var body = subject;
   var cssStyle = '*{margin:0;padding:0;box-sizing:border-box}table{color:#333;font-family:sans-serif;font-size:.9em;font-weight:300;text-align:left;line-height:40px;border-spacing:0;border:1px solid #428bca;width:500px;margin:20px auto}thead tr:first-child{background:#428bca;color:#fff;border:none}th{font-weight:700}td:first-child,th:first-child{padding:0 15px 0 20px}thead tr:last-child th{border-bottom:2px solid #ddd}tbody tr:hover{background-color:#f0fbff}tbody tr:last-child td{border:none}tbody td{border-bottom:1px solid #ddd}td:last-child{text-align:right;padding-right:10px}.button{color:#696969;padding-right:5px;cursor:pointer}.alterar:hover{color:#428bca}.excluir:hover{color:#dc2a2a}';
-  var htmlBody = '<html><style>' + cssStyle + '</style><body><a href="'+ spreadSheetsUrl +'">' + body + '</a>';
+  var htmlBody = '<html><meta charset="UTF-8"><style>' + cssStyle + '</style><body><a href="'+ spreadSheetsUrl +'">' + body + '</a>';
   htmlBody += '<br/ ><br/ >';
   htmlBody += '<table border="0" width="95%">';
   htmlBody += '<thead><tr>';
@@ -419,7 +419,7 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
   htmlBody += this.getCurrentDate('MMMM dd, yyyy @ hh:mma z');
   htmlBody += '<br/ >Procesadas : ' + Object.keys(summaryEmailData).length + ' cuentas ';
   htmlBody += 'con: ' + adsChanged + ' cambios de Ads';
-  htmlBody += '<br/ ><br/ >Hecho por : <a href="http://www.walmart.com.mx">Walmart México</a>.';
+  htmlBody += '<br/ ><br/ >Hecho por : <a href="http://"' + URL_EMAIL + '>' + URL_NAME_EMAIL + '</a>.';
   htmlBody += '</body></html>';
   
   return htmlBody;
