@@ -371,10 +371,10 @@ this.formatStringToNumber = function(numValue,isCurrency){
  * Some functions to help with logging
  */
 var LOG_LEVELS = { 'error':1, 'warn':2, 'info':3, 'debug':4 };
-this.error = function(msg) { if(LOG_LEVELS['error'] <= LOG_LEVELS[LOG_LEVEL]) { log('ERROR',msg); } }
-this.warn = function(msg)  { if(LOG_LEVELS['warn']  <= LOG_LEVELS[LOG_LEVEL]) { log('WARN' ,msg); } }
-this.info = function(msg)  { if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { log('INFO' ,msg); } }
-this.debug = function(msg) { if(LOG_LEVELS['debug'] <= LOG_LEVELS[LOG_LEVEL]) { log('DEBUG',msg); } }
+this.error = function(msg) { if(LOG_LEVELS['error'] <= LOG_LEVELS[LOG_LEVEL]) { this.log('ERROR',msg); } }
+this.warn = function(msg)  { if(LOG_LEVELS['warn']  <= LOG_LEVELS[LOG_LEVEL]) { this.log('WARN' ,msg); } }
+this.info = function(msg)  { if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { this.log('INFO' ,msg); } }
+this.debug = function(msg) { if(LOG_LEVELS['debug'] <= LOG_LEVELS[LOG_LEVEL]) { this.log('DEBUG',msg); } }
 this.log = function(type,msg) { Logger.log(type + ' - ' + msg); }
 
 }
