@@ -210,6 +210,63 @@ this.fetchURL = function(adsUrl){
 
 
 /**
+ * Send an email with the Spread Sheets URL details for the email(s) defined
+ * @param {array} Array with the results in JSON format
+ * @return {none}.
+ */
+thia.reportResults = function(results){ 
+  this.info('Generating spreadsheet report');
+  var spreadSheets = this.copySpreadsheets(CONFIG_SPREADSHEETS_URL, REPORT_PREFIX + this.getCurrentDate("dd-MM-yyyy"));
+  var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
+  var processStartTime = spreadSheet.getRange('H10').getValue();
+
+  var summaryEmailData = [];
+  
+  for(var i in results) {
+    if(!results[i].getReturnValue()) { continue; }
+    
+    var res = JSON.parse(results[i].getReturnValue());
+    this.info('Reporting data for account ' + res.accountId + ' ' + res.accountName);
+    var accountResults = this.writeAccountDataToSpreadsheet(spreadSheets, res);
+    this.writeReportSummary(spreadSheets, res, accountResults);
+    
+    summaryEmailData.push({accountId:res.accountId,
+                           accountName:res.accountName,
+                           adsCount:res.adsCount,
+                           adsProcessed:res.adsProcessed,
+                           adsChanged:accountResults.adsChanged.length,
+                           sheetUrl:accountResults.spreadSheetUrl});
+    
+    if (accountResults.adsChanged.length > 0){
+      this.info(accountResults.adsChanged.length + ' ads were changed for the account ' + res.accountName);
+    }
+  }
+
+  if(summaryEmailData.length > 0) {
+    spreadSheet.getRange('H11').setValue( this.getCurrentDate('dd/MM/yyyy HH:mm:ss') );
+    var processEndTime = spreadSheet.getRange('H11').getValue();
+  
+    var file = DriveApp.getFileById(spreadSheets.getId());
+    this.info('Sharing the SpreadSheets file with Id: ' + spreadSheets.getId());
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch(e) {
+      file.setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
+    }
+    
+    var subject = SUBJECT_EMAIL + this.getCurrentDate("dd-MM-yyyy");
+    var emailMsg = this.createSummaryHTMLEmail(subject, spreadSheets.getUrl(), summaryEmailData);
+    var options = { htmlBody : emailMsg };
+    this.info('Sending email report results');
+    for (var i in RECIPIENT_EMAIL){
+      MailApp.sendEmail(RECIPIENT_EMAIL[i], subject, subject, options);
+      this.info('Email report results send to: ' + RECIPIENT_EMAIL[i]);
+    }
+  }
+}
+
+
+/**
  * Writes the account data records in its SpreadSheet report
  * @param {SpreadSheets,array} SpreadSheets object with the report, Array with the data records by account
  * @return {array} Array with the summary data (totals) by account
