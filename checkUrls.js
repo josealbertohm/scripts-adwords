@@ -46,21 +46,6 @@ function checkAdsUrlRemoteScript(){
 
 
 /**
- * Function for launching the Ads process in parallel
- * @param {string} account list with the accounts to be processed
- * @return {void}
- */
-this.processAdsURL = function(accountList){
-  var accounts = MccApp.accounts()  
-   .withIds(accountList.split(","));
-
-  info('Processing ' + accounts.get().totalNumEntities() + ' account(s)');
-  
-  accounts.executeInParallel("this.checkUrlsReport()", "this.reportResults()");
-}
-
-
-/**
  * Function for validate Adwords URL for each MCC account in parallel mode
  * @param {none}
  * @return {array} Array in JSON format with the data results for each MCC account
