@@ -1,8 +1,13 @@
 // Comma-separated list of recipients. Comment out to not send any emails.
+// var RECIPIENT_EMAIL = ['Alma.velazquez0@walmart.com','Juan.Esparza@walmart.com','alma.velazquezg@gmail.com','josealbertohm@gmail.com','Monik.Flores@walmart.com'];
 var RECIPIENT_EMAIL = ['josealbertohm@gmail.com'];
-var SUBJECT_EMAIL = 'Walmart AdWords reporte de URLs del día ';
 
-var CONFIG_SPREADSHEETS_URL = 'https://docs.google.com/spreadsheets/d/1uVvkfn0JbNJlk63W_--FU6gM-jUwKEHGXOI9l3dvANM/edit?usp=sharing';
+var SUBJECT_EMAIL = 'Walmart AdWords reporte de URLs del día ';
+// 18 Cuentas
+// var CONFIG_SPREADSHEETS_URL = 'https://docs.google.com/spreadsheets/d/1uVvkfn0JbNJlk63W_--FU6gM-jUwKEHGXOI9l3dvANM/edit?usp=sharing';
+// Cuentas Buen-Fin
+var CONFIG_SPREADSHEETS_URL = 'https://docs.google.com/spreadsheets/d/1DG-0BwGkUJYiwMqMkHsJ_jjocN8ooS50n3_aqF8YHFg/edit?usp=sharing';
+
 var CONFIG_SPREADSHEET_NAME = 'Cuentas';
 var REPORT_PREFIX = 'Walmart AdWords reporte de URLs ';
 
@@ -13,6 +18,7 @@ var ENABLED_STATE = "enabled";
 var PAUSSED_STATE = "paussed";
 
 var LOG_LEVEL = 'info'; //change this to debug if you want more logging
+
 
 function main(){
   var accountList = createConfigReport();
@@ -195,6 +201,11 @@ function checkUrls(iterator, accountName) {
         }
       }
       
+      if (adChanged==1){
+        info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
+        changeAdStatus(ad);
+      }
+      
 	  results.push({ 
         campname:campaign.getName(),
 	    campiden:campaign.getId(),
@@ -216,29 +227,17 @@ function checkUrls(iterator, accountName) {
 
 
 /**
- * Enables or Disables the Ads, detected in the previous step process, passed in the array
- * @param {string,array} Account name related, Array with the Ad list to be changed
+ * Enables or Disables the Ad Status
+ * @param {object} Ad entity object
  * @return {none}
  */
-function enableOrDisableAds(accountName, adsChanged){
-  info('Enabling or disabling ' + adsChanged.length + ' ads for account ' + accountName);
-  
-  var adIds = [];
-  for (var i in adsChanged){
-    debug(' Ad data ' + adsChanged[i].adsId + ' : ' + adsChanged[i].adGrpId);
-    adIds.push([adsChanged[i].adsId, adsChanged[i].adGrpId]);
-  }
-  
-  var adIterator = AdWordsApp.ads().withIds(adIds).get();
-  while (adIterator.hasNext()){
-    var ad = adIterator.next();
-    if (ad.isEnabled()) {
-      info('  Ad with id ' + ad.getId() + ' will be paused');
-      // ad.pause();
-    } else if (ad.isPaused()) {
-      info('  Ad with id ' + ad.getId() + ' will be enabled');
-      // ad.enable();
-    }
+function changeAdStatus(adEntity){
+  if (adEntity.isEnabled()) {
+    info('  Ad with id ' + adEntity.getId() + ' will be paused');
+    adEntity.pause();
+  } else if (adEntity.isPaused()) {
+    info('  Ad with id ' + adEntity.getId() + ' will be enabled');
+    // adEntity.enable();
   }
 }
 
@@ -296,6 +295,7 @@ function reportResults(results){
   var processStartTime = spreadSheet.getRange('H10').getValue();
 
   var summaryEmailData = [];
+  
   for(var i in results) {
     if(!results[i].getReturnValue()) { continue; }
     
@@ -311,12 +311,11 @@ function reportResults(results){
                            adsChanged:accountResults.adsChanged.length,
                            sheetUrl:accountResults.spreadSheetUrl});
     
-    // Enable or Disable Ads
     if (accountResults.adsChanged.length > 0){
-      enableOrDisableAds(res.accountName, accountResults.adsChanged);
+      info(accountResults.adsChanged.length + ' ads were changed for the account ' + res.accountName);
     }
   }
-  
+
   if(summaryEmailData.length > 0) {
     spreadSheet.getRange('H11').setValue( getCurrentDate('dd/MM/yyyy HH:mm:ss') );
     var processEndTime = spreadSheet.getRange('H11').getValue();
@@ -437,9 +436,9 @@ function writeReportSummary(spreadSheets, res, accountResults){
     var row = summaryEmailData[i];
     htmlBody += '<tr><td align="left">'+ numAccount++ +
       '</td><td align="left"><a href="'+ row.sheetUrl +'">' + row.accountId + ' - ' + row.accountName + '</a>' +
-      '</td><td align="right">' + formatNumber(row.adsCount, "#,##0") + 
-      '</td><td align="right">' + formatNumber(row.adsProcessed, "#,##0") + 
-      '</td><td align="right">' + formatNumber(row.adsChanged, "#,##0") + 
+      '</td><td align="right">' + formatStringToNumber(row.adsCount, false) + 
+      '</td><td align="right">' + formatStringToNumber(row.adsProcessed, false) + 
+      '</td><td align="right">' + formatStringToNumber(row.adsChanged, false) + 
       '</td></tr>';
     adsChanged = adsChanged + row.adsChanged;
   }
@@ -483,7 +482,20 @@ function openSpreadsheets(spreadsheetsUrl) {
  */
 function getCurrentDate(format) { return Utilities.formatDate(new Date(), AdWordsApp.currentAccount().getTimeZone(), format); }
 
-function formatNumber(numValue, format) { return Utilities.formatString(format, numValue); }
+function formatStringToNumber(numValue,isCurrency){
+  if (numValue<1000){
+    if (isCurrency){
+      return '$ ' + numValue;
+    } else {
+      return numValue;
+    }
+  }
+  if (isCurrency){
+    return Utilities.formatString("$ %d,%02d%1f", numValue/1000, numValue%1000/10,numValue%10);
+  } else {
+    return Utilities.formatString("%d,%02d%1f", numValue/1000, numValue%1000/10,numValue%10);
+  }
+}
 
 /**
  * Some functions to help with logging
