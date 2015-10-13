@@ -229,7 +229,7 @@ this.fetchURL = function(adsUrl){
     responseCode = response.getResponseCode();
   } catch (e) {
     // Something went wrong. Since this a script error, let's mark it as 500
-    warn(e.message);
+    this.warn(e.message);
   }
   
   var then = new Date().getTime();
