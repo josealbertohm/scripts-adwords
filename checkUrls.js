@@ -46,52 +46,11 @@ function checkAdsUrlRemoteScript(){
 
 
 /**
- * Function for validate Adwords URL for each MCC account in parallel mode
- * @param {none}
- * @return {array} Array in JSON format with the data results for each MCC account
- */
-this.checkUrlsReport = function(){ 
-  var account = AdWordsApp.currentAccount();
-  var accountName = account.getName();
-  
-  var processStartTime = getCurrentDate('dd/MM/yyyy HH:mm:ss');
-  info('Processing account ' + account.getName() + ' - ' + account.getCustomerId());
-  
-  var iterator = AdWordsApp.ads()
-    .withCondition('Status IN [ENABLED,PAUSED]')
-    .orderBy('Id')
-    .get();
-  
-  var resultsUrls = [];
-  var accountProcessed = 0;
-  var totalNumEntities = iterator.totalNumEntities();
-  if (totalNumEntities>0){
-    resultsUrls = checkUrls(iterator, account.getName());
-    info('Account ' + account.getName() + ' - ' + account.getCustomerId() + ' processed ' + resultsUrls.length);
-    accountProcessed = 1;
-  } else {
-    warn("The account " + account.getName() + " has not Ads enabled or paused");
-  }
-  var processEndTime = getCurrentDate('dd/MM/yyyy HH:mm:ss');
-  
-  return JSON.stringify({
-    accountId : account.getCustomerId(),
-    accountName : account.getName(),
-    accountProcessed : accountProcessed,
-    processStartTime : processStartTime,
-    processEndTime : processEndTime,
-    adsProcessed : resultsUrls.length,
-    adsCount : totalNumEntities,
-    adsResults : resultsUrls
-  });  
-}
-
-/**
  * Function for validate each URL in the Ads listed the Ad Iterator
  * @param {iterator,string} Ads Iterator, Account Name
  * @return {array} Array in JSON format with the results
  */
-function checkUrls(iterator, accountName) {
+this.checkUrls = function(iterator, accountName) {
   if (!iterator.hasNext()) {
     return false;
   }
@@ -252,63 +211,6 @@ function fetchURL(adsUrl){
 
 
 /**
- * Send an email with the Spread Sheets URL details for the email(s) defined
- * @param {array} Array with the results in JSON format
- * @return {none}.
- */
-this.reportResults = function(results){ 
-  info('Generating spreadsheet report');
-  var spreadSheets = copySpreadsheets(CONFIG_SPREADSHEETS_URL, REPORT_PREFIX + getCurrentDate("dd-MM-yyyy"));
-  var spreadSheet = spreadSheets.getSheetByName(CONFIG_SPREADSHEET_NAME);
-  var processStartTime = spreadSheet.getRange('H10').getValue();
-
-  var summaryEmailData = [];
-  
-  for(var i in results) {
-    if(!results[i].getReturnValue()) { continue; }
-    
-    var res = JSON.parse(results[i].getReturnValue());
-    info('Reporting data for account ' + res.accountId + ' ' + res.accountName);
-    var accountResults = writeAccountDataToSpreadsheet(spreadSheets, res);
-    writeReportSummary(spreadSheets, res, accountResults);
-    
-    summaryEmailData.push({accountId:res.accountId,
-                           accountName:res.accountName,
-                           adsCount:res.adsCount,
-                           adsProcessed:res.adsProcessed,
-                           adsChanged:accountResults.adsChanged.length,
-                           sheetUrl:accountResults.spreadSheetUrl});
-    
-    if (accountResults.adsChanged.length > 0){
-      info(accountResults.adsChanged.length + ' ads were changed for the account ' + res.accountName);
-    }
-  }
-
-  if(summaryEmailData.length > 0) {
-    spreadSheet.getRange('H11').setValue( getCurrentDate('dd/MM/yyyy HH:mm:ss') );
-    var processEndTime = spreadSheet.getRange('H11').getValue();
-  
-    var file = DriveApp.getFileById(spreadSheets.getId());
-    info('Sharing the SpreadSheets file with Id: ' + spreadSheets.getId());
-    try {
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    } catch(e) {
-      file.setSharing(DriveApp.Access.DOMAIN_WITH_LINK, DriveApp.Permission.VIEW);
-    }
-    
-    var subject = SUBJECT_EMAIL + getCurrentDate("dd-MM-yyyy");
-    var emailMsg = createSummaryHTMLEmail(subject, spreadSheets.getUrl(), summaryEmailData);
-    var options = { htmlBody : emailMsg };
-    info('Sending email report results');
-    for (var i in RECIPIENT_EMAIL){
-      MailApp.sendEmail(RECIPIENT_EMAIL[i], subject, subject, options);
-      info('Email report results send to: ' + RECIPIENT_EMAIL[i]);
-    }
-  }
-}
-
-
-/**
  * Writes the account data records in its SpreadSheet report
  * @param {SpreadSheets,array} SpreadSheets object with the report, Array with the data records by account
  * @return {array} Array with the summary data (totals) by account
@@ -448,9 +350,9 @@ function openSpreadsheets(spreadsheetsUrl) {
  * @param {string} format, date and time format requested
  * @return {string} The current date and time formatted
  */
-function getCurrentDate(format) { return Utilities.formatDate(new Date(), AdWordsApp.currentAccount().getTimeZone(), format); }
+this.getCurrentDate = function(format) { return Utilities.formatDate(new Date(), AdWordsApp.currentAccount().getTimeZone(), format); }
 
-function formatStringToNumber(numValue,isCurrency){
+this.formatStringToNumber = function(numValue,isCurrency){
   if (numValue<1000){
     if (isCurrency){
       return '$ ' + numValue;
@@ -469,10 +371,10 @@ function formatStringToNumber(numValue,isCurrency){
  * Some functions to help with logging
  */
 var LOG_LEVELS = { 'error':1, 'warn':2, 'info':3, 'debug':4 };
-function error(msg) { if(LOG_LEVELS['error'] <= LOG_LEVELS[LOG_LEVEL]) { log('ERROR',msg); } }
-function warn(msg)  { if(LOG_LEVELS['warn']  <= LOG_LEVELS[LOG_LEVEL]) { log('WARN' ,msg); } }
-function info(msg)  { if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { log('INFO' ,msg); } }
-function debug(msg) { if(LOG_LEVELS['debug'] <= LOG_LEVELS[LOG_LEVEL]) { log('DEBUG',msg); } }
-function log(type,msg) { Logger.log(type + ' - ' + msg); }
+this.error = function(msg) { if(LOG_LEVELS['error'] <= LOG_LEVELS[LOG_LEVEL]) { log('ERROR',msg); } }
+this.warn = function(msg)  { if(LOG_LEVELS['warn']  <= LOG_LEVELS[LOG_LEVEL]) { log('WARN' ,msg); } }
+this.info = function(msg)  { if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { log('INFO' ,msg); } }
+this.debug = function(msg) { if(LOG_LEVELS['debug'] <= LOG_LEVELS[LOG_LEVEL]) { log('DEBUG',msg); } }
+this.log = function(type,msg) { Logger.log(type + ' - ' + msg); }
 
 }
