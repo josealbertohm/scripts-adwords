@@ -9,8 +9,6 @@ function checkAdsUrlRemoteScript(){
     var accountList = createConfigReport();
     processAdsURL(accountList);
   }
-}
-
 
 /**
  * Function for generate the config spreadSheet report
@@ -494,3 +492,4 @@ function warn(msg)  { if(LOG_LEVELS['warn']  <= LOG_LEVELS[LOG_LEVEL]) { log('WA
 function info(msg)  { if(LOG_LEVELS['info']  <= LOG_LEVELS[LOG_LEVEL]) { log('INFO' ,msg); } }
 function debug(msg) { if(LOG_LEVELS['debug'] <= LOG_LEVELS[LOG_LEVEL]) { log('DEBUG',msg); } }
 function log(type,msg) { Logger.log(type + ' - ' + msg); }
+}
