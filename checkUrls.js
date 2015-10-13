@@ -1,3 +1,9 @@
+
+/**
+ * Function checkAdsUrlRemoteScript for remote invocation
+ * @param {none}
+ * @return {none}
+ */
 function checkAdsUrlRemoteScript(){
   this.main = function(){
     var accountList = createConfigReport();
@@ -91,10 +97,10 @@ function checkUrlsReport() {
   return JSON.stringify({
     accountId : account.getCustomerId(),
     accountName : account.getName(),
-	accountProcessed : accountProcessed,
-	processStartTime : processStartTime,
-	processEndTime : processEndTime,
-	adsProcessed : resultsUrls.length,
+  accountProcessed : accountProcessed,
+  processStartTime : processStartTime,
+  processEndTime : processEndTime,
+  adsProcessed : resultsUrls.length,
     adsCount : totalNumEntities,
     adsResults : resultsUrls
   });  
@@ -142,18 +148,18 @@ function checkUrls(iterator, accountName) {
     var urlsList = "";
     for (var i = 0; i < urls.length; i++) {
       if (urls[i] == null) {
-	  results.push({ 
-        campname:campaign.getName(),
-	    campiden:campaign.getId(),
-        adgrpiden:ad.getAdGroup().getId(),
-        adiden:ad.getId(),
-        addesc:ad.getDescription1(),
-	    adsta1:'n/a',
-	    adsta2:'n/a',
-		adchanged:adChanged,
-	    adhttp:'none',
-	    adresponse:0
-	  });
+        results.push({ 
+          campname:campaign.getName(),
+          campiden:campaign.getId(),
+          adgrpiden:ad.getAdGroup().getId(),
+          adiden:ad.getId(),
+          addesc:ad.getDescription1(),
+          adsta1:'n/a',
+          adsta2:'n/a',
+          adchanged:adChanged,
+          adhttp:'none',
+          adresponse:0
+        });
         
         continue;
       }
@@ -165,39 +171,41 @@ function checkUrls(iterator, accountName) {
       }
       
       var adNewState = adState;
-	  var adChanged = 0;
+      var adChanged = 0;
       // Case Añadir Lista
       if (urlMap[lastUrl].content==1) {
         if (adState==ENABLED_STATE){
           adNewState = PAUSSED_STATE;
-		  adChanged = 1;
+          adChanged = 1;
         }
       }
       // Case Añadir A Carrito
       if (urlMap[lastUrl].content==2) {
         if (adState==PAUSSED_STATE){
           adNewState = ENABLED_STATE;
-		  adChanged = 1;
+          adChanged = 1;
         }
       }
       
       if (adChanged==1){
         info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
-        changeAdStatus(ad);
+	if (IS_TEST==0){
+          changeAdStatus(ad);
+        }
       }
       
-	  results.push({ 
+      results.push({ 
         campname:campaign.getName(),
-	    campiden:campaign.getId(),
+        campiden:campaign.getId(),
         adgrpiden:ad.getAdGroup().getId(),
         adiden:ad.getId(),
         addesc:ad.getDescription1(),
-	    adsta1:adState,
-	    adsta2:urlMap[lastUrl].content + " " + adNewState,
-		adchanged:adChanged,
-	    adhttp:lastUrl,
-	    adresponse:urlMap[lastUrl].response
-	  });
+        adsta1:adState,
+        adsta2:urlMap[lastUrl].content + " " + adNewState,
+        adchanged:adChanged,
+        adhttp:lastUrl,
+        adresponse:urlMap[lastUrl].response
+      });
     }
   }
   info(totalNumEntities + ' elements processed for account ' + accountName);
@@ -217,7 +225,7 @@ function changeAdStatus(adEntity){
     adEntity.pause();
   } else if (adEntity.isPaused()) {
     info('  Ad with id ' + adEntity.getId() + ' will be enabled');
-    // adEntity.enable();
+    adEntity.enable();
   }
 }
 
@@ -250,12 +258,12 @@ function fetchURL(adsUrl){
     var indexOfSearch = response.getContentText().indexOf(TEXT_TO_SEARCH_LISTA);
     if ((indexOfSearch > 0)) {
       result = {response:responseCode, content:1};
-	}  // End If Case 1 Agregar a Lista  
-	else {
+  }  // End If Case 1 Agregar a Lista  
+  else {
     // Case 2 Agregar a Carrito
       indexOfSearch = response.getContentText().indexOf(TEXT_TO_SEARCH_CARRITO);
-	  if ((indexOfSearch > 0)) {
-   	    result = {response:responseCode, content:2};	
+    if ((indexOfSearch > 0)) {
+         result = {response:responseCode, content:2};  
       }  // End If Case 2 Agregar a Carrito
     }
   }
@@ -310,9 +318,9 @@ function reportResults(results){
     
     var subject = SUBJECT_EMAIL + getCurrentDate("dd-MM-yyyy");
     var emailMsg = createSummaryHTMLEmail(subject, spreadSheets.getUrl(), summaryEmailData);
-	var options = { htmlBody : emailMsg };
+    var options = { htmlBody : emailMsg };
     info('Sending email report results');
-	for (var i in RECIPIENT_EMAIL){
+    for (var i in RECIPIENT_EMAIL){
       MailApp.sendEmail(RECIPIENT_EMAIL[i], subject, subject, options);
       info('Email report results send to: ' + RECIPIENT_EMAIL[i]);
     }
@@ -344,9 +352,9 @@ function writeAccountDataToSpreadsheet(spreadSheets, res) {
                   row.adchanged,
                   row.adhttp,
                   row.adresponse]);
-	if (row.adchanged==1) {
+    if (row.adchanged==1) {
       adsChanged.push({campId:row.campiden,adGrpId:row.adgrpiden,adsId:row.adiden,adsAct:row.adsta1,adsNvo:row.adsta2});
-	}
+    }
   }
   
   var lastRow = spreadSheet.getLastRow();
@@ -375,14 +383,14 @@ function writeReportSummary(spreadSheets, res, accountResults){
     var accountIdInCell = spreadSheet.getRange('M' + row).getValue();
     while (accountIdInCell != "") {    
       if (res.accountId == accountIdInCell) {
-	    spreadSheet.getRange('O' + row).setFormula('=HYPERLINK("' 
+      spreadSheet.getRange('O' + row).setFormula('=HYPERLINK("' 
                                                    + accountResults.spreadSheetUrl + '","Hoja ' + res.accountId + '")');
-	    spreadSheet.getRange('P' + row).setValue(res.processStartTime);
-	    spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
-	    spreadSheet.getRange('R' + row).setValue(res.accountProcessed);
-	    spreadSheet.getRange('S' + row).setValue(res.adsCount);
-	    spreadSheet.getRange('T' + row).setValue(res.adsProcessed);
-	    spreadSheet.getRange('U' + row).setValue(accountResults.adsChanged.length);
+      spreadSheet.getRange('P' + row).setValue(res.processStartTime);
+      spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
+      spreadSheet.getRange('R' + row).setValue(res.accountProcessed);
+      spreadSheet.getRange('S' + row).setValue(res.adsCount);
+      spreadSheet.getRange('T' + row).setValue(res.adsProcessed);
+      spreadSheet.getRange('U' + row).setValue(accountResults.adsChanged.length);
         break;
       }
       row++;
