@@ -45,6 +45,47 @@ function checkAdsUrlRemoteScript(){
 
 
 /**
+ * Function for validate Adwords URL for each MCC account in parallel mode
+ * @param {none}
+ * @return {array} Array in JSON format with the data results for each MCC account
+ */
+this.checkUrlsReport = function(account){
+  var accountName = account.getName();
+  
+  var processStartTime = this.getCurrentDate('dd/MM/yyyy HH:mm:ss');
+  this.info('Processing account ' + account.getName() + ' - ' + account.getCustomerId());
+  
+  var iterator = AdWordsApp.ads()
+    .withCondition('Status IN [ENABLED,PAUSED]')
+    .orderBy('Id')
+    .get();
+  
+  var resultsUrls = [];
+  var accountProcessed = 0;
+  var totalNumEntities = iterator.totalNumEntities();
+  if (totalNumEntities>0){
+    resultsUrls = this.checkUrls(iterator, account.getName());
+    this.info('Account ' + account.getName() + ' - ' + account.getCustomerId() + ' processed ' + resultsUrls.length);
+    accountProcessed = 1;
+  } else {
+    this.warn("The account " + account.getName() + " has not Ads enabled or paused");
+  }
+  var processEndTime = this.getCurrentDate('dd/MM/yyyy HH:mm:ss');
+  
+  return JSON.stringify({
+    accountId : account.getCustomerId(),
+    accountName : account.getName(),
+    accountProcessed : accountProcessed,
+    processStartTime : processStartTime,
+    processEndTime : processEndTime,
+    adsProcessed : resultsUrls.length,
+    adsCount : totalNumEntities,
+    adsResults : resultsUrls
+  });  
+}
+
+
+/**
  * Function for validate each URL in the Ads listed the Ad Iterator
  * @param {iterator,string} Ads Iterator, Account Name
  * @return {array} Array in JSON format with the results
