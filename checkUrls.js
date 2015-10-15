@@ -209,7 +209,7 @@ this.changeAdStatus = function(adEntity){
     adEntity.pause();
   } else if (adEntity.isPaused()) {
     this.info('  Ad with id ' + adEntity.getId() + ' will be enabled');
-    adEntity.enable();
+    // adEntity.enable();
   }
 }
 
