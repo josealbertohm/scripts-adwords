@@ -376,11 +376,11 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
       if (res.accountId == accountIdInCell) {
         spreadSheet.getRange('O' + row).setFormula('=HYPERLINK("' 
                                                    + accountResults.spreadSheetUrl + '","Hoja ' + res.accountId + '")');
-        spreadSheet.getRange('P' + row).setValue(res.processStartTime);
-        spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
-        spreadSheet.getRange('R' + row).setValue(res.accountProcessed);
-        spreadSheet.getRange('S' + row).setValue(res.adsProcessed);
-        spreadSheet.getRange('T' + row).setValue(accountResults.adsChanged.length);
+        // spreadSheet.getRange('P' + row).setValue(res.processStartTime);
+        // spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
+        spreadSheet.getRange('P' + row).setValue(res.accountProcessed);
+        spreadSheet.getRange('Q' + row).setValue(res.adsProcessed);
+        spreadSheet.getRange('S' + row).setValue(accountResults.adsChanged.length);
         break;
       }
       row++;
