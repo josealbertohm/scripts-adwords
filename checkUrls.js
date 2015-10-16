@@ -172,9 +172,16 @@ this.checkUrls = function(iterator, accountName) {
       }
       
       if (adChanged==1){
-        this.info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
 	    if (IS_TEST==0){
-          this.changeAdStatus(ad);
+          if (ONLY_PAUSSED==1){
+            if (adState==this.ENABLED_STATE){
+              this.info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
+              this.changeAdStatus(ad);
+            }
+		  } else {
+            this.info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
+            this.changeAdStatus(ad);
+		  }
         }
       }
       
@@ -372,9 +379,8 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
         spreadSheet.getRange('P' + row).setValue(res.processStartTime);
         spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
         spreadSheet.getRange('R' + row).setValue(res.accountProcessed);
-        spreadSheet.getRange('S' + row).setValue(res.adsCount);
-        spreadSheet.getRange('T' + row).setValue(res.adsProcessed);
-        spreadSheet.getRange('U' + row).setValue(accountResults.adsChanged.length);
+        spreadSheet.getRange('S' + row).setValue(res.adsProcessed);
+        spreadSheet.getRange('T' + row).setValue(accountResults.adsChanged.length);
         break;
       }
       row++;
