@@ -167,7 +167,7 @@ this.checkUrls = function(iterator, accountName) {
       if (urlMap[lastUrl].content==2) {
         if (adState==this.PAUSSED_STATE){
           adNewState = this.ENABLED_STATE;
-          adChanged = 1;
+          adChanged = 0;
         }
       }
       
