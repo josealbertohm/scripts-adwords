@@ -379,7 +379,8 @@ this.writeReportSummary = function(spreadSheets, res, accountResults){
         // spreadSheet.getRange('P' + row).setValue(res.processStartTime);
         // spreadSheet.getRange('Q' + row).setValue(res.processEndTime);
         spreadSheet.getRange('P' + row).setValue(res.accountProcessed);
-        spreadSheet.getRange('Q' + row).setValue(res.adsProcessed);
+        spreadSheet.getRange('Q' + row).setValue(res.adsCount);
+		spreadSheet.getRange('R' + row).setValue(res.adsProcessed);
         spreadSheet.getRange('S' + row).setValue(accountResults.adsChanged.length);
         break;
       }
