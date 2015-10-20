@@ -172,16 +172,16 @@ this.checkUrls = function(iterator, accountName) {
       }
       
       if (adChanged==1){
-	    if (IS_TEST==0){
+        if (IS_TEST==0){
           if (ONLY_PAUSSED==0){
-            if (adState==this.ENABLED_STATE){
+            if (adNewState==this.ENABLED_STATE){
               this.info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
               this.changeAdStatus(ad);
             }
-		  } else {
+    	  } else {
             this.info("Changing the status to the Ad " + ad.getId() + ' in the account ' + accountName);
             this.changeAdStatus(ad);
-		  }
+    	  }
         }
       }
       
